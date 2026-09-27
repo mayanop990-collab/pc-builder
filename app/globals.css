@@ -1,26 +1,366 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@theme {
+  --color-bg: #05060b;
+  --color-surface: #0b0e17;
+  --color-surface-2: #111626;
+  --color-line: #1d2438;
+  --color-text: #e6e9f2;
+  --color-muted: #8a93ab;
+  --color-neon: #22d3ee;
+  --color-neon-2: #a855f7;
+  --color-neon-3: #f43f5e;
+  --color-ok: #22c55e;
+  --color-warn: #f59e0b;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-orbitron);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-pulse-glow: pulse-glow 2.4s ease-in-out infinite;
+  --animate-spin-slow: spin 12s linear infinite;
+  --animate-marquee: marquee 30s linear infinite;
+  --animate-scan: scan 4s linear infinite;
+  --animate-bar: bar 2.2s ease-in-out infinite;
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-14px); }
+  }
+  @keyframes pulse-glow {
+    0%, 100% { opacity: .55; filter: blur(60px); }
+    50% { opacity: .9; filter: blur(80px); }
+  }
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  @keyframes scan {
+    from { transform: translateY(-100%); }
+    to { transform: translateY(400%); }
+  }
+  @keyframes bar {
+    0%, 100% { transform: scaleX(.35); }
+    50% { transform: scaleX(1); }
   }
 }
 
+:root {
+  color-scheme: dark;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+::selection {
+  background: color-mix(in oklab, var(--color-neon) 40%, transparent);
+}
+
+::-webkit-scrollbar { width: 10px; }
+::-webkit-scrollbar-track { background: var(--color-bg); }
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(var(--color-neon), var(--color-neon-2));
+  border-radius: 10px;
+}
+
+/* Circuit-style grid used behind sections */
+.bg-grid {
+  background-image:
+    linear-gradient(to right, color-mix(in oklab, var(--color-neon) 8%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in oklab, var(--color-neon) 8%, transparent) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(ellipse at center, #000 30%, transparent 75%);
+}
+
+.text-gradient {
+  background: linear-gradient(90deg, var(--color-neon), var(--color-neon-2), var(--color-neon-3), var(--color-neon));
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: gradient-shift 6s linear infinite;
+}
+
+@keyframes gradient-shift {
+  to { background-position: 300% 0; }
+}
+
+/* Animated RGB border that appears on hover */
+.rgb-border {
+  position: relative;
+  isolation: isolate;
+}
+.rgb-border::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: conic-gradient(from var(--angle), var(--color-neon), var(--color-neon-2), var(--color-neon-3), var(--color-neon));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity .35s ease;
+  animation: rotate-angle 4s linear infinite;
+  z-index: -1;
+  pointer-events: none;
+}
+.rgb-border:hover::before,
+.rgb-border.is-active::before {
+  opacity: 1;
+}
+
+@property --angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+@keyframes rotate-angle {
+  to { --angle: 360deg; }
+}
+
+.glow-card {
+  transition: transform .35s cubic-bezier(.2,.8,.2,1), box-shadow .35s ease, background-color .35s ease;
+}
+.glow-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 50px -20px color-mix(in oklab, var(--color-neon) 55%, transparent),
+              0 0 0 1px color-mix(in oklab, var(--color-neon) 25%, transparent);
+}
+
+.btn-neon {
+  position: relative;
+  overflow: hidden;
+  transition: transform .2s ease, box-shadow .3s ease;
+}
+.btn-neon::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, transparent 30%, rgba(255,255,255,.35) 50%, transparent 70%);
+  transform: translateX(-120%);
+  transition: transform .6s ease;
+}
+.btn-neon:hover::after { transform: translateX(120%); }
+.btn-neon:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px -8px color-mix(in oklab, var(--color-neon) 70%, transparent);
+}
+.btn-neon:active { transform: translateY(0) scale(.98); }
+
+.nav-link {
+  position: relative;
+}
+.nav-link::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  right: 50%;
+  bottom: -6px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--color-neon), var(--color-neon-2));
+  transition: left .3s ease, right .3s ease;
+  border-radius: 2px;
+}
+.nav-link:hover::after,
+.nav-link[aria-current="page"]::after {
+  left: 0;
+  right: 0;
+}
+
+/* Scroll reveal (toggled by <Reveal>) */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity .8s cubic-bezier(.2,.8,.2,1), transform .8s cubic-bezier(.2,.8,.2,1);
+  transition-delay: var(--delay, 0ms);
+}
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* Layered so Tailwind utilities (pl-10, w-auto, ...) can still override it */
+@layer components {
+  .input {
+    width: 100%;
+    border-radius: .75rem;
+    border: 1px solid var(--color-line);
+    background: var(--color-surface);
+    padding: .7rem 1rem;
+    color: var(--color-text);
+    outline: none;
+    transition: border-color .2s ease, box-shadow .2s ease;
+  }
+  .input::placeholder { color: color-mix(in oklab, var(--color-muted) 70%, transparent); }
+  .input:focus {
+    border-color: var(--color-neon);
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-neon) 20%, transparent);
+  }
+}
+
+.page-enter {
+  animation: page-enter .6s cubic-bezier(.2,.8,.2,1) backwards;
+}
+@keyframes page-enter {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .reveal { opacity: 1; transform: none; }
+}
+
+/* ---------- Visual upgrade ---------- */
+
+/* Slow-moving aurora behind the whole site */
+.aurora {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+  background: var(--color-bg);
+}
+.aurora::before,
+.aurora::after {
+  content: "";
+  position: absolute;
+  width: 60vmax;
+  height: 60vmax;
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: .16;
+  animation: aurora-drift 26s ease-in-out infinite alternate;
+}
+.aurora::before {
+  background: var(--color-neon);
+  top: -20vmax;
+  left: -15vmax;
+}
+.aurora::after {
+  background: var(--color-neon-2);
+  bottom: -25vmax;
+  right: -15vmax;
+  animation-delay: -13s;
+}
+@keyframes aurora-drift {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(18vw, 10vh) scale(1.15); }
+  100% { transform: translate(-6vw, 22vh) scale(.95); }
+}
+
+/* Faint scanlines for a monitor-like texture */
+.scanlines {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  background: repeating-linear-gradient(to bottom, rgba(255,255,255,.018) 0 1px, transparent 1px 3px);
+}
+
+/* Cursor spotlight: --mx/--my are set by <SiteEffects> on hover */
+.spotlight {
+  position: relative;
+}
+.spotlight::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 50%),
+    color-mix(in oklab, var(--color-neon) 14%, transparent), transparent 45%);
+  opacity: 0;
+  transition: opacity .3s ease;
+}
+.spotlight:hover::after { opacity: 1; }
+
+/* 3D tilt: --rx/--ry are set by <SiteEffects> */
+.tilt {
+  transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transition: transform .25s ease-out, box-shadow .35s ease;
+  transform-style: preserve-3d;
+}
+.tilt:hover {
+  box-shadow: 0 25px 60px -25px color-mix(in oklab, var(--color-neon) 60%, transparent),
+              0 0 0 1px color-mix(in oklab, var(--color-neon) 25%, transparent);
+}
+
+.glass {
+  background: color-mix(in oklab, var(--color-surface) 70%, transparent);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+/* Glitch flicker on hover for display headings */
+.glitch {
+  position: relative;
+  display: inline-block;
+}
+.glitch:hover {
+  animation: glitch .35s steps(2) 2;
+}
+@keyframes glitch {
+  0% { text-shadow: 2px 0 var(--color-neon-3), -2px 0 var(--color-neon); transform: translate(0); }
+  25% { text-shadow: -2px 0 var(--color-neon-3), 2px 0 var(--color-neon); transform: translate(-1px, 1px); }
+  50% { text-shadow: 2px 1px var(--color-neon-2), -2px -1px var(--color-neon); transform: translate(1px, -1px); }
+  100% { text-shadow: none; transform: translate(0); }
+}
+
+/* Animated circuit traces in the hero */
+.trace {
+  stroke-dasharray: 6 14;
+  animation: trace-flow 3s linear infinite;
+}
+@keyframes trace-flow {
+  to { stroke-dashoffset: -120; }
+}
+
+.toast-enter {
+  animation: toast-in .45s cubic-bezier(.2,.9,.3,1.2) both;
+}
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(20px) scale(.95); }
+  to { opacity: 1; transform: none; }
+}
+
+.caret::after {
+  content: "";
+  display: inline-block;
+  width: 3px;
+  height: .9em;
+  margin-left: 4px;
+  vertical-align: -.05em;
+  background: var(--color-neon);
+  animation: blink 1s steps(1) infinite;
+}
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
+.mega-enter {
+  animation: mega-in .25s ease-out both;
+}
+@keyframes mega-in {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (hover: none) {
+  .tilt { transform: none; }
 }
